@@ -1,6 +1,6 @@
 use std::{
     fmt,
-    ops::{Add, Mul},
+    ops::{Add, AddAssign, Mul},
 };
 
 use anyhow::{anyhow, Result};
@@ -13,7 +13,7 @@ pub struct Matrix<T> {
 
 pub fn multiply<T>(a: &Matrix<T>, b: &Matrix<T>) -> Result<Matrix<T>>
 where
-    T: Copy + Default + Mul<Output = T> + Add<Output = T>,
+    T: Copy + Default + Mul<Output = T> + Add<Output = T> + AddAssign,
 {
     if a.col != b.row {
         return Err(anyhow!("Matrix size mismatch"));
@@ -23,7 +23,7 @@ where
     for i in 0..a.row {
         for j in 0..b.col {
             for k in 0..a.col {
-                data[i * b.col + j] = a.data[i * a.col + k] * b.data[k * b.col + j];
+                data[i * b.col + j] += a.data[i * a.col + k] * b.data[k * b.col + j];
             }
         }
     }
@@ -87,8 +87,8 @@ mod tests {
         println!("{}", c);
         assert_eq!(c.row, 2);
         assert_eq!(c.col, 2);
-        assert_eq!(c.data, vec![15, 18, 30, 36]);
-        assert_eq!(format!("{:?}", c), "Matrix(2x2, {15 18,30 36})");
+        assert_eq!(c.data, vec![22, 28, 49, 64]);
+        assert_eq!(format!("{:?}", c), "Matrix(2x2, {22 28,49 64})");
         Ok(())
     }
 }
